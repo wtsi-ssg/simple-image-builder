@@ -7,5 +7,6 @@
     "null_user": "",
     "null_key": "",
     "vm_pass": "",
-    "extra_script": "../../mysql_scripts/install_mysql.sh"
+    "extra_script": "mysql_scripts/install_mysql.sh",
+    "directory": "image-creation/ubuntu14.04"
 }
