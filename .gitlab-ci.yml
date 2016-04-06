@@ -23,7 +23,6 @@ validate_template:
   tags: 
    - packer
   script:
-   - cd image-creation/ubuntu14.04/
    - ./create_image.py validate template.json -vf ../../variables.json
 
 build_openstack:
@@ -31,7 +30,6 @@ build_openstack:
  tags:
   - packer
  script:
-  - cd image-creation/ubuntu14.04/
   - IMAGE_NAME=${IMAGE_NAME}"mysql_"
   - ./create_image.py build template.json -vf ../../variables.json -p openstack -o $IMAGE_NAME -s 
 
@@ -40,7 +38,6 @@ build_vmware:
   tags:
    - packer
   script:
-   - cd image-creation/ubuntu14.04/
    - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no  vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
    - IMAGE_NAME=${IMAGE_NAME}"mysql_"$(date +%Y%m%d%H%M%S )
    - ./create_image.py build template.json -vf ../../variables.json -p vmware-iso -o $IMAGE_NAME
