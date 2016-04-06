@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@gitlab.internal.sanger.ac.uk:sciaas/image-creation.git
 	branch = master
-	commit = 6cce096cda8ec06acc4223fb29a3ab22f54e8f4a
-	parent = 90431c78675f629415b61a73a6e73ed8a046bcc2
+	commit = 9559df1d8ceadf05e0f16e5b5c0c4ea3b8f55b84
+	parent = da73c11e8981707acafa1aa53fbda7d49171621b
 	cmdver = 0.3.0
