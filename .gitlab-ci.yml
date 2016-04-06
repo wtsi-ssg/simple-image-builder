@@ -1,0 +1,46 @@
+variables:
+ OS_NO_CACHE: "True"
+ COMPUTE_API_VERSION: "1.1"
+ no_proxy: ",172.31.4.18"
+ OS_CLOUDNAME: "overcloud"
+ OS_AUTH_URL: "http://172.31.4.18:5000/v2.0/"
+ NOVA_VERSION: "1.1"
+ PACKER_BIN: "/home/gitlab-runner/packer-0.9.1"
+ OS_BASE_IMAGE: "20811a86-6dbb-4ef7-9047-75a4a6727773"
+ IMAGE_NAME: "ubuntu_14_04_4_WTSI_"
+ OS_SECURITY_GRP: "ssh"
+ OS_API_KEY: "test"
+ VMWARE_BUILD_HOST: "wtgc-vmbd-01.internal.sanger.ac.uk"
+ http_proxy: "http://wwwcache.sanger.ac.uk:3128"
+ https_proxy: "http://wwwcache.sanger.ac.uk:3128"
+
+stages:
+ - init
+ - build
+
+validate_template:
+  stage: init
+  tags: 
+   - packer
+  script:
+   - cd image-creation/ubuntu14.04/
+   - ./create_image.py -m validate -tf template.json -vf ../../variables.json
+
+build_openstack:
+ stage: build
+ tags:
+  - packer
+ script:
+  - cd image-creation/ubuntu14.04/
+  - IMAGE_NAME=${IMAGE_NAME}"mysql_"
+  - ./create_image.py build -p openstack -o $IMAGE_NAME -s 
+
+build_vmware:
+  stage: build
+  tags:
+   - packer
+  script:
+   - cd image-creation/ubuntu14.04/
+   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no  vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
+   - IMAGE_NAME=${IMAGE_NAME}"mysql_"$(date +%Y%m%d%H%M%S )
+   - ./create_image.py build -p vmware-iso -o $IMAGE_NAME
