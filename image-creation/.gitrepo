@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = git@gitlab.internal.sanger.ac.uk:sciaas/image-creation.git
-	branch = volume
+	branch = v1.0.0 
 	commit = 078c304dd2ff06fcbe752ce91b45b4deb0419dde
 	parent = 62302b45645a76df39ce43be0a45901b4268a3fd
 	cmdver = 0.3.0
