@@ -49,30 +49,30 @@ stages:
 #    - IMAGE_NAME=${IMAGE_NAME}"_"$(date +%Y%m%d%H%M%S )
 #    - ./create_image.py build template.json variables.json -p vmware-iso -o $IMAGE_NAME
 
-test_openstack_no_disk:
-  stage: test
-  tags:
-   - openstack
-   - kitchen
-  script:
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w $IMAGE_NAME |  cut -d " " -f 1)
-  - pwd
-  - ls -a
-  - cp .kitchen.openstack.no_disk.yml .kitchen.yml
-  - http_proxy="" https_proxy=""  kitchen test
-  - kitchen destroy
+# test_openstack_no_disk:
+#   stage: test
+#   tags:
+#    - openstack
+#    - kitchen
+#   script:
+#   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w $IMAGE_NAME |  cut -d " " -f 1)
+#   - pwd
+#   - ls -a
+#   - cp .kitchen.openstack.no_disk.yml .kitchen.yml
+#   - http_proxy="" https_proxy=""  kitchen test
+#   - kitchen destroy
 
 
-test_openstack_disk:
-  stage: test
-  tags:
-   - openstack
-   - kitchen
-  script:
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w $IMAGE_NAME |  cut -d " " -f 1)
-  - cp .kitchen.openstack.disk.yml .kitchen.yml
-  - http_proxy="" https_proxy="" kitchen test
-  - kitchen destroy
+# test_openstack_disk:
+#   stage: test
+#   tags:
+#    - openstack
+#    - kitchen
+#   script:
+#   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w $IMAGE_NAME |  cut -d " " -f 1)
+#   - cp .kitchen.openstack.disk.yml .kitchen.yml
+#   - http_proxy="" https_proxy="" kitchen test
+#   - kitchen destroy
 
 store_openstack_image:
   stage: store
