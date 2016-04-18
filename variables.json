@@ -1,3 +1,4 @@
+:q
 {
     "packer_username": "ubuntu",
     "packer_password": "ubuntu",
@@ -6,6 +7,7 @@
     "boot_cmd": "<esc><esc><enter><wait> /install/vmlinuz debian-installer=en_GB auto locale=en_GB kbd-chooser/method=gb fb=false debconf/frontend=noninteractive keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=GB keyboard-configuration/variant=GB console-setup/ask_detect=false  initrd=/install/initrd.gz netcfg/get_domain=vm  noapic ",
     "null_user": "",
     "null_key": "",
+    "VMWARE_BUILD_HOST": "wtgc-vmbd-01.internal.sanger.ac.uk",
     "extra_script": "mysql_scripts/install_mysql.sh",
     "directory": "image-creation/ubuntu14.04"
 }
