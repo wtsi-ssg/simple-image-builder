@@ -1,1 +1,1 @@
-image-creation/ubuntu14.04/cleanup.py
+image-creation-v2.1.1/ubuntu14.04/cleanup.py
