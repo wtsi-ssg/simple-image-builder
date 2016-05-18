@@ -81,6 +81,6 @@ store_openstack_image:
   tags:
   - packer
   script:
-  - ./cleanup.py
+  - ./cleanup.py -dt "${IMAGE_NAME}"_"${CI_BUILD_REF}" "${IMAGE_NAME}"
 
 
