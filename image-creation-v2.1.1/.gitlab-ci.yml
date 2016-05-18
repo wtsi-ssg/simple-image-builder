@@ -1,0 +1,84 @@
+variables:
+ OS_NO_CACHE: "True"
+ COMPUTE_API_VERSION: "1.1"
+ no_proxy: ",172.31.4.18"
+ OS_CLOUDNAME: "overcloud"
+ OS_AUTH_URL: "http://172.31.4.18:5000/v2.0/"
+ NOVA_VERSION: "1.1"
+ PACKER_BIN: "/home/gitlab-runner/packer-0.9.1"
+ OS_BASE_IMAGE: "20811a86-6dbb-4ef7-9047-75a4a6727773"
+ IMAGE_NAME: "ubuntu_14_04_4_WTSI_standard"
+ OS_SECURITY_GRP: "ssh"
+ OS_KEY: "test"
+ VMWARE_BUILD_HOST: "wtgc-vmbd-01.internal.sanger.ac.uk"
+ http_proxy: "http://wwwcache.sanger.ac.uk:3128"
+ https_proxy: "http://wwwcache.sanger.ac.uk:3128"
+
+
+stages:
+ - init
+ - build
+ - test
+ - store
+
+validate_template:
+  stage: init
+  tags: 
+   - packer
+  script:
+   - cd ubuntu14.04
+   - ./create_image.py validate template.json variables.json.example 
+
+build_openstack:
+ stage: build
+ tags:
+  - packer
+ script:
+  - cd ubuntu14.04
+  - ./create_image.py build template.json variables.json.example -p openstack -o $IMAGE_NAME
+
+
+build_vmware:
+  stage: build
+  tags:
+   - packer
+  script:
+   - cd ubuntu14.04
+   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
+   - IMAGE_NAME=${IMAGE_NAME}"_"$(date +%Y%m%d%H%M%S )
+   - ./create_image.py build template.json variables.json.example -p vmware-iso -o $IMAGE_NAME
+   - mv $IMAGE_NAME/ /var/tmp 
+   - rm vmware_private_key.pem
+
+
+test_openstack_no_disk:
+  stage: test
+  tags:
+   - openstack
+   - kitchen
+  script:
+  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w $IMAGE_NAME |  cut -d " " -f 1)
+  - cp .kitchen.openstack.no_disk.yml .kitchen.yml
+  - http_proxy="" https_proxy=""  kitchen test
+  - kitchen destroy
+
+
+test_openstack_disk:
+  stage: test
+  tags:
+   - openstack
+   - kitchen
+  script:
+  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w $IMAGE_NAME |  cut -d " " -f 1)
+  - cp .kitchen.openstack.disk.yml .kitchen.yml
+  - http_proxy="" https_proxy="" kitchen test
+  - kitchen destroy
+
+store_openstack_image:
+  stage: store
+  tags:
+  - packer
+  script:
+  - cd ubuntu14.04
+  - ./cleanup.py
+

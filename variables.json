@@ -8,5 +8,5 @@
     "null_key": "",
     "VMWARE_BUILD_HOST": "wtgc-vmbd-01.internal.sanger.ac.uk",
     "extra_script": "mysql_scripts/install_mysql.sh",
-    "directory": "image-creation/ubuntu14.04"
+    "directory": "image-creation-v4.0.0/ubuntu14.04"
 }
