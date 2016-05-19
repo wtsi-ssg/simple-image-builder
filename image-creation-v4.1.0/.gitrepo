@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@gitlab.internal.sanger.ac.uk:sciaas/image-creation.git
+	branch = v4.1.0
+	commit = 095e9f77f89da7c8f0534b0ea0516419ffa5f302
+	parent = 86564bba613ae16e02f4a4c846a975f415095803
+	cmdver = 0.3.0
