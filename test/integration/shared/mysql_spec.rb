@@ -17,15 +17,9 @@ describe 'Test ID: 1' do
 	end
 end
 
-describe 'Test ID: 2' do
-	describe command('mysqladmin -u root --password=supersecret version') do
+describe 'Test ID: 2 & Test ID:3' do
+	describe command('mysqladmin -u root version') do
 	  its(:stdout) { should contain('5.6').after('Distrib') }
-	end
-end
-
-describe 'Test ID: 3' do
-	describe command('echo "exit" | mysql -u root --password=supersecret') do
-	  its(:exit_status) { should eq 0 }
 	end
 end
 
@@ -48,8 +42,8 @@ describe 'Test ID: 7' do
 end
 
 describe 'Test ID: 8' do
-	describe file('/var/lib/mysql') do
-	  its(:size) { should < 100000 }
+	describe file('/var/lib/mysql/') do
+	  it { should be_directory }
 	end
 end
 
