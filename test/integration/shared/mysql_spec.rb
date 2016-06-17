@@ -17,6 +17,12 @@ describe 'Test ID: 1' do
 	end
 end
 
+describe 'mysql client configured'
+        describe command('mysql -u root -e "show processlist"') do
+          its(:stdout) { should contain('show processlisit') }
+        end
+end
+
 describe 'Test ID: 2 & Test ID:3' do
 	describe command('mysqladmin -u root version') do
 	  its(:stdout) { should contain('5.6').after('Distrib') }
