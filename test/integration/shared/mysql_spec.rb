@@ -18,14 +18,14 @@ describe 'Test ID: 1' do
 end
 
 describe 'mysql client configured'
-        describe command('mysql -u root -e "show processlist"') do
-          its(:stdout) { should contain('show processlisit') }
-        end
+    describe command('mysql -u root --password=supersecret -e "show processlist"') do
+      its(:stdout) { should contain('show processlist') }
+    end
 end
 
 describe 'Test ID: 2 & Test ID:3' do
-	describe command('mysqladmin -u root version') do
-	  its(:stdout) { should contain('5.6').after('Distrib') }
+	describe command('mysqladmin -u root --password=supersecret version') do
+	  its(:stdout) { should contain('5.6').after('Server version') }
 	end
 end
 
