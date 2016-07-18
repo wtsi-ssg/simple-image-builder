@@ -8,5 +8,16 @@
     "null_key": "",
     "VMWARE_BUILD_HOST": "wtgc-vmbd-01.internal.sanger.ac.uk",
     "extra_script": "mysql_scripts/install_mysql.sh",
-    "directory": "image-creation-v4.1.0/ubuntu14.04"
+    "directory": "image-creation/ubuntu14.04",
+    "packer_directory": ".",
+    "ansible_rolepath0": "./ansible/roles/null",
+    "ansible_rolepath1": "./ansible/roles/null",
+    "ansible_rolepath2": "./ansible/roles/null",
+    "ansible_rolepath3": "./ansible/roles/null",
+    "ansible_rolepath4": "./ansible/roles/null",
+    "ansible_rolepath5": "./ansible/roles/null",
+    "ansible_rolepath6": "./ansible/roles/null",
+    "ansible_rolepath7": "./ansible/roles/null",
+    "ansible_rolepath8": "./ansible/roles/null",
+    "ansible_rolepath9": "./ansible/roles/null"
 }
