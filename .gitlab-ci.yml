@@ -1,13 +1,13 @@
 variables:
  OS_NO_CACHE: "True"
  COMPUTE_API_VERSION: "1.1"
- no_proxy: ",172.31.4.18"
+ no_proxy: ",172.31.0.18"
  OS_CLOUDNAME: "overcloud"
- OS_AUTH_URL: "http://172.31.4.18:5000/v2.0/"
+ OS_AUTH_URL: "http://openstack-gamma.internal.sanger.ac.uk:5000/v2.0/"
  NOVA_VERSION: "1.1"
  PACKER_BIN: "/home/gitlab-runner/packer-0.9.1"
- OS_BASE_IMAGE: "20811a86-6dbb-4ef7-9047-75a4a6727773"
- IMAGE_NAME: "ubuntu_14_04_4_WTSI_mysql"
+ OS_BASE_IMAGE: "8f50f1c3-b094-492b-8c73-191a8f1f5582"
+ IMAGE_NAME: "ubuntu_14_04_4_WTSI_standard"
  OS_SECURITY_GRP: "ssh"
  VMWARE_BUILD_HOST: "wtgc-vmbd-01.internal.sanger.ac.uk"
  http_proxy: "http://wwwcache.sanger.ac.uk:3128"
@@ -27,14 +27,14 @@ validate_template:
   tags: 
    - packer
   script:
-   - ./create_image.py validate 
+   - ./create_image.py validate -vf variables.json 
 
 build_openstack:
  stage: build
  tags:
   - packer
  script:
-  - ./create_image.py build -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+  - ./create_image.py build -d local -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
 
 build_vmware:
@@ -44,7 +44,7 @@ build_vmware:
   script:
    - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
    - IMAGE_NAME=${IMAGE_NAME}"_"$(date +%Y%m%d%H%M%S )
-   - ./create_image.py build -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - ./create_image.py build -d local -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
    - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware 
    - rm vmware_private_key.pem
 
@@ -56,6 +56,7 @@ cleanup_openstack_build:
    - ./remove_failed_builds.py
   when: on_failure
 
+
 test_openstack_no_disk:
   stage: test
   tags:
@@ -64,7 +65,8 @@ test_openstack_no_disk:
   script:
   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
   - export MODE=default
-  - export KEYPAIR=$(date | md5sum | cut -d " " -f 1)
+  - export KEYPAIR=$(date +%s-%N | md5sum | cut -d " " -f 1)
+  - echo "Using $OS_BASE_IMAGE ( ${IMAGE_NAME}_${CI_BUILD_REF} ) "
   - openstack keypair create $KEYPAIR >> $KEYPAIR
   - http_proxy="" https_proxy=""  kitchen test
   - kitchen destroy
@@ -78,7 +80,8 @@ test_openstack_disk:
   script:
   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
   - export MODE=volume
-  - export KEYPAIR=$(date | md5sum | cut -d " " -f 1)
+  - export KEYPAIR=$(date +%s-%N | md5sum | cut -d " " -f 1)
+  - echo "Using $OS_BASE_IMAGE ( ${IMAGE_NAME}_${CI_BUILD_REF} ) " 
   - openstack keypair create $KEYPAIR >> $KEYPAIR
   - http_proxy="" https_proxy="" kitchen test
   - kitchen destroy
