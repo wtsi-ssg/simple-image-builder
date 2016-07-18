@@ -68,7 +68,7 @@ test_openstack_no_disk:
   - export KEYPAIR=$(date +%s-%N | md5sum | cut -d " " -f 1)
   - echo "Using $OS_BASE_IMAGE ( ${IMAGE_NAME}_${CI_BUILD_REF} ) "
   - openstack keypair create $KEYPAIR >> $KEYPAIR
-  - http_proxy="" https_proxy=""  kitchen test -l debug
+  - http_proxy="" https_proxy=""  kitchen test 
   - kitchen destroy
   - openstack keypair delete $KEYPAIR
 
@@ -83,7 +83,7 @@ test_openstack_disk:
   - export KEYPAIR=$(date +%s-%N | md5sum | cut -d " " -f 1)
   - echo "Using $OS_BASE_IMAGE ( ${IMAGE_NAME}_${CI_BUILD_REF} ) " 
   - openstack keypair create $KEYPAIR >> $KEYPAIR
-  - http_proxy="" https_proxy="" kitchen test -l debug
+  - http_proxy="" https_proxy="" kitchen test
   - kitchen destroy
   - openstack keypair delete $KEYPAIR
 
