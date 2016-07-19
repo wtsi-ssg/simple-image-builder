@@ -3,29 +3,9 @@ require 'serverspec'
 # Required by serverspec
 set :backend, :exec
 
-#horrible patch to the String class to allow numeric comparison
-# class String
-#   def be_greater_than other
-#     to_i > other.to_i rescue false
-#   end
-# end
-
-
 describe 'Test ID: 1' do
 	describe service('mysql') do
 	  it { should be_enabled }
-	end
-end
-
-describe 'mysql client configured'
-    describe command('mysql -u root --password=supersecret -e "show processlist"') do
-      its(:stdout) { should contain('show processlist') }
-    end
-end
-
-describe 'Test ID: 2 & Test ID:3' do
-	describe command('mysqladmin -u root --password=supersecret version') do
-	  its(:stdout) { should contain('5.6').after('Server version') }
 	end
 end
 
@@ -53,8 +33,14 @@ describe 'Test ID: 8' do
 	end
 end
 
-#mysql/8
-# describe command('du -sh /var/lib/mysql | cut -d M -f 1')
-#   its(:stdout) { should be_greater_than "100" }
-# end
+describe 'mysql client configured' do
+    describe command('mysql -u root --password=supersecret -e "show processlist"') do
+      its(:stdout) { should contain('show processlist') }
+    end
+end
 
+describe 'Test ID: 2 & Test ID:3' do
+        describe command('mysqladmin -u root --password=supersecret version') do
+          its(:stdout) { should contain('5.6').after('Server version') }
+        end
+end
