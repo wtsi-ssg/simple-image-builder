@@ -27,14 +27,16 @@ validate_template:
   tags: 
    - packer
   script:
-   - ./create_image.py validate -vf variables.json 
+   - cd ubuntu14.04
+   - ./create_image.py validate -vf variables.json.example 
 
 build_openstack:
  stage: build
  tags:
   - packer
  script:
-  - ./create_image.py build -d local -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+  - cd ubuntu14.04
+  - ./create_image.py build -d local -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
 
 build_vmware:
@@ -42,9 +44,10 @@ build_vmware:
   tags:
    - packer
   script:
+   - cd ubuntu14.04
    - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
    - IMAGE_NAME=${IMAGE_NAME}"_"$(date +%Y%m%d%H%M%S )
-   - ./create_image.py build -d local -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - ./create_image.py build -d local -vf variables.json.example -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
    - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware 
    - rm vmware_private_key.pem
 
@@ -53,6 +56,7 @@ cleanup_openstack_build:
   tags:
    - packer
   script:
+   - cd ubuntu14.04
    - ./remove_failed_builds.py
   when: on_failure
 
@@ -66,10 +70,8 @@ test_openstack_no_disk:
   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
   - export MODE=default
   - export KEYPAIR=$(date +%s-%N | md5sum | cut -d " " -f 1)
-  - echo "Using $OS_BASE_IMAGE ( ${IMAGE_NAME}_${CI_BUILD_REF} ) "
   - openstack keypair create $KEYPAIR >> $KEYPAIR
-  - cat $KEYPAIR
-  - http_proxy="" https_proxy=""  kitchen test 
+  - http_proxy="" https_proxy=""  kitchen test
   - kitchen destroy
   - openstack keypair delete $KEYPAIR
 
@@ -82,9 +84,7 @@ test_openstack_disk:
   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
   - export MODE=volume
   - export KEYPAIR=$(date +%s-%N | md5sum | cut -d " " -f 1)
-  - echo "Using $OS_BASE_IMAGE ( ${IMAGE_NAME}_${CI_BUILD_REF} ) " 
   - openstack keypair create $KEYPAIR >> $KEYPAIR
-  - cat $KEYPAIR
   - http_proxy="" https_proxy="" kitchen test
   - kitchen destroy
   - openstack keypair delete $KEYPAIR
@@ -94,6 +94,7 @@ cleanup_openstack_test:
   tags:
    - packer
   script:
+   - cd ubuntu14.04
    - ./remove_failed_builds.py
   when: on_failure
 
@@ -102,5 +103,6 @@ store_openstack_image:
   tags:
   - packer
   script:
+  - cd ubuntu14.04
   - ./cleanup.py -dt "${IMAGE_NAME}"_"${CI_BUILD_REF}" "${IMAGE_NAME}"
 
