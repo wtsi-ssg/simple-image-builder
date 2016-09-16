@@ -41,7 +41,6 @@ validate_template_trusty_openstack:
   tags: 
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
    - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json.example 
@@ -51,7 +50,6 @@ validate_template_trusty_vmware:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
    - export ISO_URL="$ISO_URL_TRUSTY"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
@@ -63,7 +61,6 @@ validate_template_xenial_openstack:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_XENIAL"
    - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json.example
@@ -73,7 +70,6 @@ validate_template_xenial_vmware:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
    - export ISO_URL="$ISO_URL_TRUSTY"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
@@ -85,7 +81,6 @@ validate_template_centos7_openstack:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
    - ./create_image.py validate -tf template-openstack-centos.json -vf variables.json.example
@@ -95,7 +90,6 @@ validate_template_centos7_vmware:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
    - export ISO_URL="$ISO_URL_CENTOS"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_CENTOS"
@@ -108,7 +102,6 @@ build_openstack_trusty:
  tags:
   - packer
  script:
-  - cd packer
   - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
   - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
@@ -118,7 +111,6 @@ build_openstack_xenial:
  tags:
   - packer
  script:
-  - cd packer
   - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_XENIAL"
   - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
@@ -128,7 +120,6 @@ build_openstack_centos7:
  tags:
   - packer
  script:
-  - cd packer
   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
   - ./create_image.py build -d local -tf template-openstack-centos.json -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
@@ -138,7 +129,6 @@ build_vmware_trusty:
   tags:
    - packer
   script:
-   - cd packer
    - export ISO_URL="$ISO_URL_TRUSTY"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
    - export BOOT_COMMAND="$BOOT_COMMAND_TRUSTY"
@@ -155,7 +145,6 @@ build_vmware_xenial:
   tags:
    - packer
   script:
-   - cd packer
    - export ISO_URL="$ISO_URL_XENIAL"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_XENIAL"
    - export BOOT_COMMAND="$BOOT_COMMAND_XENIAL"
@@ -172,7 +161,6 @@ build_vmware_centos:
   tags:
    - packer
   script:
-   - cd packer
    - export ISO_URL="$ISO_URL_CENTOS"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_CENTOS"
    - export BOOT_COMMAND="$BOOT_COMMAND_CENTOS"
@@ -189,7 +177,6 @@ cleanup_openstack_build:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
    - ./remove_failed_builds.py
    - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
@@ -300,7 +287,6 @@ cleanup_openstack_test:
   tags:
    - packer
   script:
-   - cd packer
    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
    - ./remove_failed_builds.py
    - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
@@ -315,7 +301,6 @@ store_openstack_image:
   tags:
   - packer
   script:
-  - cd packer
   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
   - ./cleanup.py -dt "${IMAGE_NAME}"_"${CI_BUILD_REF}" "${IMAGE_NAME}"
   - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
