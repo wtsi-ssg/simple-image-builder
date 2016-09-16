@@ -1,1 +1,1 @@
-image-creation/ubuntu14.04/cleanup.py
+image-creation/packer/cleanup.py

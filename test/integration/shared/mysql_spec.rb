@@ -41,6 +41,6 @@ end
 
 describe 'Test ID: 2 & Test ID:3' do
         describe command('mysqladmin -u root --password=supersecret version') do
-          its(:stdout) { should contain('5.6').after('Server version') }
+          its(:stdout) { should contain('5.7').after('Server version') }
         end
 end
