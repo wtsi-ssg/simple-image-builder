@@ -43,7 +43,7 @@ validate_template_trusty_openstack:
   script:
    - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
-   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json.example 
+   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json
 
 validate_template_trusty_vmware:
   stage: init_vmware
@@ -54,7 +54,7 @@ validate_template_trusty_vmware:
    - export ISO_URL="$ISO_URL_TRUSTY"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
    - export BOOT_COMMAND="$BOOT_COMMAND_TRUSTY"
-   - ./create_image.py validate -tf template-vmware-ubuntu.json -vf variables.json.example
+   - ./create_image.py validate -tf template-vmware-ubuntu.json -vf variables.json
 
 validate_template_xenial_openstack:
   stage: init_openstack
@@ -63,7 +63,7 @@ validate_template_xenial_openstack:
   script:
    - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_XENIAL"
-   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json.example
+   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json
 
 validate_template_xenial_vmware:
   stage: init_vmware
@@ -74,7 +74,7 @@ validate_template_xenial_vmware:
    - export ISO_URL="$ISO_URL_TRUSTY"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
    - export BOOT_COMMAND="$BOOT_COMMAND_TRUSTY"
-   - ./create_image.py validate -tf template-vmware-ubuntu.json -vf variables.json.example
+   - ./create_image.py validate -tf template-vmware-ubuntu.json -vf variables.json
 
 validate_template_centos7_openstack:
   stage: init_openstack
@@ -83,7 +83,7 @@ validate_template_centos7_openstack:
   script:
    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
-   - ./create_image.py validate -tf template-openstack-centos.json -vf variables.json.example
+   - ./create_image.py validate -tf template-openstack-centos.json -vf variables.json
 
 validate_template_centos7_vmware:
   stage: init_vmware
@@ -94,7 +94,7 @@ validate_template_centos7_vmware:
    - export ISO_URL="$ISO_URL_CENTOS"
    - export ISO_CHECKSUM="$ISO_CHECKSUM_CENTOS"
    - export BOOT_COMMAND="$BOOT_COMMAND_CENTOS"
-   - ./create_image.py validate -tf template-vmware-centos.json -vf variables.json.example
+   - ./create_image.py validate -tf template-vmware-centos.json -vf variables.json
 
 
 build_openstack_trusty:
@@ -104,7 +104,7 @@ build_openstack_trusty:
  script:
   - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
-  - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+  - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
 build_openstack_xenial:
  stage: build_openstack
@@ -113,7 +113,7 @@ build_openstack_xenial:
  script:
   - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_XENIAL"
-  - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+  - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
 build_openstack_centos7:
  stage: build_openstack
@@ -122,7 +122,7 @@ build_openstack_centos7:
  script:
   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
-  - ./create_image.py build -d local -tf template-openstack-centos.json -vf variables.json.example -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+  - ./create_image.py build -d local -tf template-openstack-centos.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
 build_vmware_trusty:
   stage: build_vmware
@@ -136,7 +136,7 @@ build_vmware_trusty:
    - export https_proxy="$http_proxy"
    - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
    - export IMAGE_NAME=${IMAGE_NAME_TRUSTY}${CI_BUILD_ID}
-   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json.example -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
    - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware 
    - rm vmware_private_key.pem
 
@@ -152,7 +152,7 @@ build_vmware_xenial:
    - export https_proxy="$http_proxy"
    - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
    - export IMAGE_NAME=${IMAGE_NAME_XENIAL}${CI_BUILD_ID}
-   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json.example -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
    - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware
    - rm vmware_private_key.pem
 
@@ -168,7 +168,7 @@ build_vmware_centos:
    - export https_proxy="$http_proxy"
    - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
    - export IMAGE_NAME=${IMAGE_NAME_CENTOS7}${CI_BUILD_ID}
-   - ./create_image.py build -d local -tf template-vmware-centos.json  -vf variables.json.example -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - ./create_image.py build -d local -tf template-vmware-centos.json  -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
    - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware
    - rm vmware_private_key.pem
 
