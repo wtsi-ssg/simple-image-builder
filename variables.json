@@ -2,7 +2,7 @@
     "null_user": "",
     "null_key": "",
     "VMWARE_BUILD_HOST": "wtgc-vmbd-01.internal.sanger.ac.uk",
-    "extra_script": "scripts/null.sh",
+    "extra_script": "scripts/install_mysql.sh",
     "directory": "image-creation/packer",
     "packer_directory": ".",
     "ansible_rolepath0": "./ansible/roles/null",
