@@ -208,7 +208,7 @@ test_openstack_no_disk_xenial:
    - openstack
    - kitchen
   script:
-  - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
+  - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
   - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
   - export MODE=default
   - export IMAGE_USERNAME="ubuntu"
