@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/bash -x
+
+echo DEBUG: USER = ${USER}
+lsb_release -a
 
 ## This will be changed by cloud-init
 MYSQL_PASSWORD=supersecret
