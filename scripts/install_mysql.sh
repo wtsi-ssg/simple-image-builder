@@ -14,7 +14,12 @@ if [ -e /etc/debian_version ] ; then
 elif [ -e /etc/centos-release ] ; then
     yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
     yum install -y Percona-Server-server-57 percona-toolkit percona-xtrabackup-24
-    mysqladmin password ${MYSQL_PASSWORD}
+    systemctl start mysqld
+    # hoopla because root's password is randomly set, and starts off expired
+    GENPW=`grep "generated for root" /var/log/mysqld.log | sed 's/.*localhost: //'`
+    mysqladmin --password="$GENPW" password C0mp-leX
+    mysql --password=C0mp-leX mysql -e "uninstall plugin validate_password;"
+    mysqladmin --password=C0mp-leX password ${MYSQL_PASSWORD}
 else
     echo ""
     echo "Couldn't identify OS - help!"
