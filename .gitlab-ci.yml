@@ -30,7 +30,7 @@ stages:
  - init_openstack
  - init_vmware
  - build_openstack
- - build_vmware
+   # - build_vmware
  - cleanup_build
  - test_openstack
  - cleanup_test
