@@ -13,7 +13,7 @@ if [ -e /etc/debian_version ] ; then
     apt-get -y install percona-server-server-5.7 percona-toolkit percona-xtrabackup-24
 elif [ -e /etc/centos-release ] ; then
     # need to remove mariadb before installing percona to avoid conflicts
-    yum remove mariadb-devel mariadb-libs
+    yum remove -y mariadb-devel mariadb-libs
     yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
     yum install -y Percona-Server-server-57 percona-toolkit percona-xtrabackup-24
     systemctl start mysqld
