@@ -30,11 +30,13 @@ stages:
  - init_openstack
  - init_vmware
  - build_openstack
-   # - build_vmware
  - cleanup_build
  - test_openstack
  - cleanup_test
  - store
+
+# will add this back after "build_openstack" later
+# - build_vmware
 
 validate_template_trusty_openstack:
   stage: init_openstack
