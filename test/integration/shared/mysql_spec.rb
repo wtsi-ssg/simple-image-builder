@@ -22,9 +22,15 @@ describe 'Test ID: 5' do
 end
 
 describe 'Test ID: 7' do
+    if os[:family] == 'centos'
+	describe command('systemctl restart mysqld') do
+	  its(:exit_status) { should eq 0 }
+	end
+    elsif os[:family] == 'ubuntu'
 	describe command('/etc/init.d/mysql restart') do
 	  its(:exit_status) { should eq 0 }
 	end
+    end
 end
 
 describe 'Test ID: 8' do
