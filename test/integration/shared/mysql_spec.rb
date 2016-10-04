@@ -22,7 +22,7 @@ describe 'Test ID: 5' do
 end
 
 describe 'Test ID: 7' do
-    if os[:family] == 'centos'
+    if os[:family] == 'redhat'
 	describe command('systemctl restart mysqld') do
 	  its(:exit_status) { should eq 0 }
 	end
