@@ -30,13 +30,11 @@ stages:
  - init_openstack
  - init_vmware
  - build_openstack
+ - build_vmware
  - cleanup_build
  - test_openstack
  - cleanup_test
  - store
-
-# will add this back after "build_openstack" later
-# - build_vmware
 
 validate_template_trusty_openstack:
   stage: init_openstack
@@ -126,53 +124,53 @@ build_openstack_centos7:
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
   - ./create_image.py build -d local -tf template-openstack-centos.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
-#build_vmware_trusty:
-#  stage: build_vmware
-#  tags:
-#   - packer
-#  script:
-#   - export ISO_URL="$ISO_URL_TRUSTY"
-#   - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
-#   - export BOOT_COMMAND="$BOOT_COMMAND_TRUSTY"
-#   - export http_proxy="$http_proxy"
-#   - export https_proxy="$http_proxy"
-#   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
-#   - export IMAGE_NAME=${IMAGE_NAME_TRUSTY}${CI_BUILD_ID}
-#   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
-#   - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware 
-#   - rm vmware_private_key.pem
-#
-#build_vmware_xenial:
-#  stage: build_vmware
-#  tags:
-#   - packer
-#  script:
-#   - export ISO_URL="$ISO_URL_XENIAL"
-#   - export ISO_CHECKSUM="$ISO_CHECKSUM_XENIAL"
-#   - export BOOT_COMMAND="$BOOT_COMMAND_XENIAL"
-#   - export http_proxy="$http_proxy"
-#   - export https_proxy="$http_proxy"
-#   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
-#   - export IMAGE_NAME=${IMAGE_NAME_XENIAL}${CI_BUILD_ID}
-#   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
-#   - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware
-#   - rm vmware_private_key.pem
-#
-#build_vmware_centos:
-#  stage: build_vmware
-#  tags:
-#   - packer
-#  script:
-#   - export ISO_URL="$ISO_URL_CENTOS"
-#   - export ISO_CHECKSUM="$ISO_CHECKSUM_CENTOS"
-#   - export BOOT_COMMAND="$BOOT_COMMAND_CENTOS"
-#   - export http_proxy="$http_proxy"
-#   - export https_proxy="$http_proxy"
-#   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
-#   - export IMAGE_NAME=${IMAGE_NAME_CENTOS7}${CI_BUILD_ID}
-#   - ./create_image.py build -d local -tf template-vmware-centos.json  -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
-#   - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware
-#   - rm vmware_private_key.pem
+build_vmware_trusty:
+  stage: build_vmware
+  tags:
+   - packer
+  script:
+   - export ISO_URL="$ISO_URL_TRUSTY"
+   - export ISO_CHECKSUM="$ISO_CHECKSUM_TRUSTY"
+   - export BOOT_COMMAND="$BOOT_COMMAND_TRUSTY"
+   - export http_proxy="$http_proxy"
+   - export https_proxy="$http_proxy"
+   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
+   - export IMAGE_NAME=${IMAGE_NAME_TRUSTY}${CI_BUILD_ID}
+   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware 
+   - rm vmware_private_key.pem
+
+build_vmware_xenial:
+  stage: build_vmware
+  tags:
+   - packer
+  script:
+   - export ISO_URL="$ISO_URL_XENIAL"
+   - export ISO_CHECKSUM="$ISO_CHECKSUM_XENIAL"
+   - export BOOT_COMMAND="$BOOT_COMMAND_XENIAL"
+   - export http_proxy="$http_proxy"
+   - export https_proxy="$http_proxy"
+   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
+   - export IMAGE_NAME=${IMAGE_NAME_XENIAL}${CI_BUILD_ID}
+   - ./create_image.py build -d local -tf template-vmware-ubuntu.json -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware
+   - rm vmware_private_key.pem
+
+build_vmware_centos:
+  stage: build_vmware
+  tags:
+   - packer
+  script:
+   - export ISO_URL="$ISO_URL_CENTOS"
+   - export ISO_CHECKSUM="$ISO_CHECKSUM_CENTOS"
+   - export BOOT_COMMAND="$BOOT_COMMAND_CENTOS"
+   - export http_proxy="$http_proxy"
+   - export https_proxy="$http_proxy"
+   - sshpass -p $VMWARE_PASSWORD scp -oStrictHostKeyChecking=no vmbuildadmin@wtgc-vmbd-01.internal.sanger.ac.uk:~/vmware_private_key.pem .
+   - export IMAGE_NAME=${IMAGE_NAME_CENTOS7}${CI_BUILD_ID}
+   - ./create_image.py build -d local -tf template-vmware-centos.json  -vf variables.json -p vmware-iso -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+   - mv $IMAGE_NAME/ /warehouse/isg_warehouse/SciaaS_images/vmware
+   - rm vmware_private_key.pem
 
 cleanup_openstack_build:
   stage: cleanup_build
