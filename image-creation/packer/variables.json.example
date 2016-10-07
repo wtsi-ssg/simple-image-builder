@@ -1,9 +1,9 @@
 {
-    "null_user": "",
-    "null_key": "",
+    "null_user": "<null username>",
+    "null_key": "<null key file>",
     "VMWARE_BUILD_HOST": "wtgc-vmbd-01.internal.sanger.ac.uk",
-    "extra_script": "scripts/install_mysql.sh",
-    "directory": "image-creation/packer",
+    "extra_script": "scripts/null.sh",
+    "directory": ".",
     "packer_directory": ".",
     "ansible_rolepath0": "./ansible/roles/null",
     "ansible_rolepath1": "./ansible/roles/null",

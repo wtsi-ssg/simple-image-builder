@@ -22,9 +22,15 @@ describe 'Test ID: 5' do
 end
 
 describe 'Test ID: 7' do
+    if os[:family] == 'redhat'
+	describe command('systemctl restart mysqld') do
+	  its(:exit_status) { should eq 0 }
+	end
+    elsif os[:family] == 'ubuntu'
 	describe command('/etc/init.d/mysql restart') do
 	  its(:exit_status) { should eq 0 }
 	end
+    end
 end
 
 describe 'Test ID: 8' do
@@ -41,6 +47,6 @@ end
 
 describe 'Test ID: 2 & Test ID:3' do
         describe command('mysqladmin -u root --password=supersecret version') do
-          its(:stdout) { should contain('5.6').after('Server version') }
+          its(:stdout) { should contain('5.7').after('Server version') }
         end
 end

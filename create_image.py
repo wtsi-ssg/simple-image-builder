@@ -1,1 +1,1 @@
-image-creation/ubuntu14.04/create_image.py
+image-creation/packer/create_image.py
