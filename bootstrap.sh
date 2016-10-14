@@ -1,3 +1,1 @@
-#!/bin/bash
-
-apt-get install -y ruby rubygems-integration 
+image-creation/bootstrap.sh

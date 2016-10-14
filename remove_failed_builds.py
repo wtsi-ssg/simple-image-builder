@@ -1,1 +1,1 @@
-image-creation/ubuntu14.04/remove_failed_builds.py
+image-creation/packer/remove_failed_builds.py

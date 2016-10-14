@@ -94,7 +94,7 @@ An additional script to run to configure this image - this script must exist, if
 ### directory 
 The directory variable is a file path to the image-creation/ubuntu14.04 directory. This directory contains the standard scripts and files that are capable of building the base image
 
-## mysql_scripts
+## scripts
 This directory contains the scripts used to configure MySQL. 
 
 
