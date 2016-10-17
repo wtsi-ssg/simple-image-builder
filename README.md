@@ -1,7 +1,6 @@
-# MySQL Ubuntu 14.04 Image builder
+# Example Image builder
 
-These are scripts to build a Ubuntu 14.04 image with a MySQL database on: 
-- Virtual Box
+These are scripts to build a Ubuntu 14.04,16.04 and Centos 7.2 image. 
 - VMWare
 - Openstack 
 
@@ -28,10 +27,6 @@ This will build images for the supplied platform(s) or all. If the option valida
   - sys  
   - time  
 
-
-## VMWare private key
-
-Communication with the ESX server is via SSH a private key is required to connect to the server, this should be placed in the file **vmware_private_key.pem** 
 
 ## Openstack Credentials
 
@@ -81,13 +76,14 @@ Security group to apply to the build (must allow SSH access to the booted image)
 The files *variables.json* contains configuration variables required to build the image important variables are:-
 
 ### packer_username &  packer_password
-The username & password that will be burnt into the image as a default user
+The username & password that will be used in the image as a default user
 
 ### iso_url &  iso_checksum
 The URL of an ISO image to build against - this is used for virtualbox & vmware builds
 
 ### vm_pass
 The password to use to connect to the vmware build host
+
 ### extra_script
 An additional script to run to configure this image - this script must exist, if no additional customization is required this should be a "NOOP" script
 
@@ -95,9 +91,7 @@ An additional script to run to configure this image - this script must exist, if
 The directory variable is a file path to the image-creation/ubuntu14.04 directory. This directory contains the standard scripts and files that are capable of building the base image
 
 ## scripts
-This directory contains the scripts used to configure MySQL. 
-
-
+This directory contains the scripts used additional software. 
 
 ## VMWare cleanup
 

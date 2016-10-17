@@ -1,0 +1,1 @@
+../../../image-creation/test/integration/shared/serverspec/common_spec.rb

@@ -1,1 +1,0 @@
-../../shared/mysql_spec.rb
