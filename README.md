@@ -58,9 +58,9 @@ drwxrwxr-x 3 james james 4096 Oct 31 14:18 test
 -rw-rw-r-- 1 james james  644 Oct 31 14:18 variables.json
 ```
 
-Ensure the variables are defined ( in gitlab, see image ):
+Ensure the variables are defined ( in gitlab, see image below ):
 
-![ Image showing menu ] ( https://gitlab.internal.sanger.ac.uk/sciaas/simple-image-builder/raw/master/docs/variables%20menu.png )
+<kbd>![ Image showing menu ] ( https://gitlab.internal.sanger.ac.uk/sciaas/simple-image-builder/raw/master/docs/variables%20menu.png )</kbd>
 
 OS_TENANT_NAME which should be set to the tenant, each group should have their own tenant for ci jobs.
 
@@ -81,6 +81,8 @@ Total 638 (delta 301), reused 638 (delta 301)
 To git@gitlab.internal.sanger.ac.uk:jb23/play.git
  * [new branch]      master -> master
 ```
+
+When there are later releases these can be pulled on to a feature branch so that you can take advantage of them.
 
 There is a branch named vmware which extends the system to support vmware...
 
