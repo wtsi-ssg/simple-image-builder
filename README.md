@@ -1,7 +1,6 @@
 # Example Image builder
 
-These are scripts to build a Ubuntu 14.04,16.04 and Centos 7.2 image. 
-- Openstack 
+These are scripts to build a Ubuntu 14.04,16.04 and Centos 7.2 image for Openstack.
 
 The system is controlled via variables.json and .gitlab-ci.yml and finally the variables configured by the repository.
 
@@ -84,7 +83,7 @@ To git@gitlab.internal.sanger.ac.uk:jb23/play.git
 
 When there are later releases these can be pulled on to a feature branch so that you can take advantage of them.
 
-There is a branch named vmware which extends the system to support vmware...
+There is a branch named vmware which extends the system to support vmware if you need to use this come and talk to us.
 
 ## extra_script
 
