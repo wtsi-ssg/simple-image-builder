@@ -1,7 +1,6 @@
 {
     "null_user": "",
     "null_key": "",
-    "VMWARE_BUILD_HOST": "wtgc-vmbd-01.internal.sanger.ac.uk",
     "extra_script": "scripts/null.sh",
     "directory": "image-creation/packer",
     "packer_directory": ".",
