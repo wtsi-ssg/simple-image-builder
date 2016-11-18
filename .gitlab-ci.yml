@@ -43,7 +43,7 @@ validate_template_trusty_openstack:
   script:
    - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
    - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
-   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json
+   - ./create_image.py validate --debug -tf template-openstack-ubuntu.json -vf variables.json
 
 validate_template_trusty_vmware:
   stage: init_vmware
