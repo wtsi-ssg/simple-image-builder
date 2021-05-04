@@ -1,0 +1,14 @@
+#!/bin/bash
+remote="$(git remote  -v | awk '/^origin.*fetch/ {print $2}')"
+uniq=$(date +%s)
+for i in $( cat .supported_branches )
+do
+  base="/tmp/update$uniq/$i"
+  mkdir -p $base
+  cd $base
+  git clone $remote .
+  git checkout $i
+  git pull origin master --no-edit
+  git commit -m "Pull master"
+  git push origin $i
+done

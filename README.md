@@ -1,100 +1,135 @@
-# Example Image builder
+# Image Creation
+This repository contains scripts to build images on:
+- Virtual Box
+- Openstack   
 
-These are scripts to build a Ubuntu 14.04,16.04 and Centos 7.2 image for Openstack.
+Currently Ubuntu 18.04, Ubuntu 20.04 and Centos 7 are supported.
+## Usage
 
-The system is controlled via variables.json and .gitlab-ci.yml and finally the variables configured by the repository.
+**Legacy:** *./packer.sh (build|validate) (virtualbox|openstack|all)*  
+./create_image.py (build|validate) [options]
 
-The expectation is that this repository will be used as a basis for a groups work, here is an example of using it as a basis for a new task.
+This will build images for the supplied platform(s) or all. If the option validate is issued then the template will only be checked for syntax.
 
-Use gitlab to create a new project in this case jb23_play
+## Prequisites
+
+- Packer version 1.6.1 (or later), this can be set either in the path, as an environment variable $PACKER_BIN or on the command line. If none of these are set then ./create_image.py will try and use the copy of packer in /software
+- Openstack packages
+- python packages:  
+  - python-glanceclient  
+  - python-novaclient  
+  - python-openstackclient  
+  - argparse  
+  - random  
+  - string  
+  - os  
+  - subprocess  
+  - sys  
 
 
+## Openstack Credentials
+
+The openstack credentials & environment is configured in the **remote_username**
+
+
+- COMPUTE_API_VERSION
+
+Version required to support openstack clients (1.1 minimum)
+
+- OS_CLOUDNAME
+
+Name of the cloud to connect to (in the event of multiple cloud environments)
+
+- OS_AUTH_URL
+
+URL of the API endpoint
+
+- NOVA_VERSION
+
+Should match the COMPUTE_API_VERSION above.
+
+- OS_USERNAME
+
+** Defined in Variables section of project settings ** Username to connect to the openstack environment with
+
+- OS_PASSWORD
+
+** Defined in Variables section of project settings ** Password for the above user
+
+- OS_TENANT_NAME
+
+** Defined in Variables section of project settings ** Tenant within openstack to use for the build
+
+- OS_BASE_IMAGE
+
+Base image ID to use for the build
+
+- OS_SECURITY_GRP
+
+Security group to apply to the build (must allow SSH access to the booted image)
+
+- OS_NETWORK_IDS
+
+The network(s) on which to build and test. Only necessary in tenants with more than 1 network
+
+## CIFS Credentials
+
+If CI_STORE_IMAGE is set then the images will be stored via cifs
+
+- CIFS_PATH for example: //172.30.139.13/isg_warehouse
+
+- CIFS_USERNAME for example: image_creator note the lack of SANGER/ this should be a service account as the password is specified in the below variable
+
+- CIFS_PASSWORD
+
+## 
+
+## Variables
+
+The files *variables.json* contains default configuration variables required to build the image important variables are:-
+
+### packer_username &  packer_password
+The username & password that will be burnt into the image as a default user
+
+### extra_script
+An additional script to run to configure this image - this script must exist, if no additional customization is required this should be a "NOOP" script (eg /bin/true)
+### directory 
+The directory variable is a file path to the image-creation/ubuntu14.04 directory. This is useful if this repository is being used as a subrepo. This is how the majority of the images are being built in the SciaaS area of gitlab. If you have simply cloned the image and want to run it inside this repository then simply leave the value as '.' 
+
+
+## Scripts
+
+The scripts directory contains provisioner scripts that are called by packer to customize the image.
+
+- compiler_tools.sh
+
+Installs the packages require to bulid software & linux kernel
+
+- sudoers.sh
+
+Updates the sudoers file
+
+- update.sh
+
+Updates all packages to the latest version (apt-get ugrade / dist-upgrade) and purges the cache
+
+- install_cloud-init.sh
+
+Installs the cloud-init package used for per-instance configuration of the machine.
+
+This script also patches the cc_disk_setup.py module of cloud init to fix a bug in version 0.7.5. The script will check that the file is the correct one before attempting to patch.
+
+The Cloud-init configuration is updated to cause the initialization & mounting of the first extra disk (the name of this is dependant on the hypervisor in use - vdb for openstack or sdb for vmware/virtualbox)
+
+# Contributing
+**All commits to the master branch should only be done after thorough testing on another branch. Any commit to the master branch should have a tag that follows semantic versioning as laid out at semver.org. Before commiting a major change all users must be told**
+ At the time of writing all repositories in the SciaaS area of gitlab use this repository. Therefore all contributors to those repositories must be informed. If the user base is not known then email http://lists.sanger.ac.uk/mailman/listinfo/openstack-beta
+
+# Generating images with the CI
+The CI will only save images if CI_STORE_IMAGE is set in the CI pipeline. This can be done in the web UI with the Run Pipeline form (green button, top right)  
+It can also be done via the api if the user has an api token. An example to start storing pipelines of all the supported branches:
 ```
-14:15 ~/src/git $ git clone git@gitlab.internal.sanger.ac.uk:jb23/play.git
-Cloning into 'play'...
-warning: You appear to have cloned an empty repository.
-Checking connectivity... done.
+for i in $(cat .supported_branches); do
+  curl -XPOST "https://gitlab.internal.sanger.ac.uk/api/v4/projects/86/pipeline?ref=${i}&variables[][key]=CI_STORE_IMAGE&variables[][value]=true" --header "PRIVATE-TOKEN: $TOKEN"
+done
 ```
-
-Now add this repository as a remote
-
-```
-14:16 ~/src/git $ cd play/
-14:16 ~/src/git/play (master)$ git remote add ISG_SOURCE git@gitlab.internal.sanger.ac.uk:sciaas/simple-image-builder.git
-14:17 ~/src/git/play (master)$ git remote -v
-ISG_SOURCE	git@gitlab.internal.sanger.ac.uk:sciaas/simple-image-builder.git (fetch)
-ISG_SOURCE	git@gitlab.internal.sanger.ac.uk:sciaas/simple-image-builder.git (push)
-origin	git@gitlab.internal.sanger.ac.uk:jb23/play.git (fetch)
-origin	git@gitlab.internal.sanger.ac.uk:jb23/play.git (push)
-```
-
-Now pull the example down.
-
-```
-14:18 ~/src/git/play (master)$ git pull  ISG_SOURCE master
-remote: Counting objects: 638, done.
-remote: Compressing objects: 100% (226/226), done.
-remote: Total 638 (delta 301), reused 627 (delta 295)
-Receiving objects: 100% (638/638), 123.93 KiB | 0 bytes/s, done.
-Resolving deltas: 100% (301/301), done.
-From gitlab.internal.sanger.ac.uk:sciaas/simple-image-builder
- * branch            master     -> FETCH_HEAD
- * [new branch]      master     -> ISG_SOURCE/master
-14:18 ~/src/git/play (master)$ ls -l
-total 20
-lrwxrwxrwx 1 james james   29 Oct 31 14:18 ansible -> image-creation/packer/ansible
-lrwxrwxrwx 1 james james   27 Oct 31 14:18 bootstrap.sh -> image-creation/bootstrap.sh
-lrwxrwxrwx 1 james james   32 Oct 31 14:18 cleanup.py -> image-creation/packer/cleanup.py
-lrwxrwxrwx 1 james james   37 Oct 31 14:18 create_image.py -> image-creation/packer/create_image.py
-drwxrwxr-x 5 james james 4096 Oct 31 14:18 image-creation
-lrwxrwxrwx 1 james james   33 Oct 31 14:18 kitchen_wrapper.sh -> image-creation/kitchen_wrapper.sh
--rw-rw-r-- 1 james james 1192 Oct 31 14:18 README.md
-lrwxrwxrwx 1 james james   45 Oct 31 14:18 remove_failed_builds.py -> image-creation/packer/remove_failed_builds.py
-drwxrwxr-x 2 james james 4096 Oct 31 14:18 scripts
-lrwxrwxrwx 1 james james   52 Oct 31 14:18 template-openstack-centos.json -> image-creation/packer/template-openstack-centos.json
-lrwxrwxrwx 1 james james   52 Oct 31 14:18 template-openstack-ubuntu.json -> image-creation/packer/template-openstack-ubuntu.json
-drwxrwxr-x 3 james james 4096 Oct 31 14:18 test
--rw-rw-r-- 1 james james  644 Oct 31 14:18 variables.json
-```
-
-Ensure the variables are defined ( in gitlab, see image below ):
-
-<kbd>![ Image showing menu ] ( https://gitlab.internal.sanger.ac.uk/sciaas/simple-image-builder/raw/master/docs/variables%20menu.png )</kbd>
-
-OS_TENANT_NAME which should be set to the tenant, each group should have their own tenant for ci jobs.
-
-OS_USERNAME this should normally be the same as the OS_TENANT by convention
-
-OS_PASSWORD this is the password for the OS_USERNAME
-
-
-Then push you master branch to origin and see if the ci builds an image for you. Once that works you can move on towards customising it.
-
-```
-14:27 ~/src/git/play (master)$ git push origin master
-Counting objects: 638, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (220/220), done.
-Writing objects: 100% (638/638), 123.93 KiB | 0 bytes/s, done.
-Total 638 (delta 301), reused 638 (delta 301)
-To git@gitlab.internal.sanger.ac.uk:jb23/play.git
- * [new branch]      master -> master
-```
-
-When there are later releases these can be pulled on to a feature branch so that you can take advantage of them.
-
-There is a branch named vmware which extends the system to support vmware if you need to use this come and talk to us.
-
-## extra_script
-
-An additional script to run to configure this image - this script must exist, if no additional customization is required this should be a "NOOP" script
-
-## scripts
-
-This directory contains the scripts used additional software. 
-
-## ansible
-
-This directory by default is linked to the image-creation repository, if you wish to use ansible to configure you system then you will need to remove the symbolic link and copy the contents of image-creation/packer/ansible to ansible and then make changes. If additional roles are required they should be listed in variables.json as a role_path
-
-

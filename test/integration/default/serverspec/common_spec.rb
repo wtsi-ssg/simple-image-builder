@@ -1,1 +1,1 @@
-../../shared/common_spec.rb
+../../shared/serverspec/common_spec.rb

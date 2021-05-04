@@ -1,1 +1,0 @@
-../../shared/serverspec/common_spec.rb
