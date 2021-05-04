@@ -1,0 +1,19 @@
+{
+    "reboot": "NO",
+    "null_user": "<null username>",
+    "null_key": "<null key file>",
+    "extra_script": "scripts/null.sh",
+    "post_reboot_extra_script": "scripts/null.sh",
+    "directory": ".",
+    "packer_directory": ".",
+    "ansible_rolepath0": "./ansible/roles/null",
+    "ansible_rolepath1": "./ansible/roles/null",
+    "ansible_rolepath2": "./ansible/roles/null",
+    "ansible_rolepath3": "./ansible/roles/null",
+    "ansible_rolepath4": "./ansible/roles/null",
+    "ansible_rolepath5": "./ansible/roles/null",
+    "ansible_rolepath6": "./ansible/roles/null",
+    "ansible_rolepath7": "./ansible/roles/null",
+    "ansible_rolepath8": "./ansible/roles/null",
+    "ansible_rolepath9": "./ansible/roles/null"
+}

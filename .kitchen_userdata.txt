@@ -1,0 +1,6 @@
+#cloud-config
+bootcmd:
+- [ cloud-init-per, once, mkfs, mkfs.ext4, /dev/vdb ]
+mounts:
+ - [ /dev/vdb , /data1, auto, "defaults" ]
+

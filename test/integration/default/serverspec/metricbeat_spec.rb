@@ -1,0 +1,1 @@
+../../shared/serverspec/metricbeat_spec.rb

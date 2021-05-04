@@ -1,1 +1,0 @@
-image-creation/packer/cleanup.py

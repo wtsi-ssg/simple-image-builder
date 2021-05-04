@@ -1,20 +1,34 @@
 variables:
+ IMAGE_NAME_FOCAL: "focal-WTSI-standard_${CI_PIPELINE_ID}"
+ IMAGE_NAME_BIONIC: "bionic-WTSI-standard_${CI_PIPELINE_ID}"
+ IMAGE_NAME_CENTOS7: "centos7-WTSI-standard_${CI_PIPELINE_ID}"
  OS_NO_CACHE: "True"
  COMPUTE_API_VERSION: "1.1"
- no_proxy: ",172.31.0.18" 
+ no_proxy: ",172.27.66.32" 
  OS_CLOUDNAME: "overcloud"
- OS_AUTH_URL: "http://openstack-gamma.internal.sanger.ac.uk:5000/v2.0/"
+ OS_AUTH_BASE: "https://theta.internal.sanger.ac.uk:5000/"
+ OS_AUTH_URL: "$OS_AUTH_BASE/v3"
+ OS_DOMAIN_NAME:  "Default"
+ OS_IDENTITY_API_VERSION: 3
+ OS_IMAGE_API_VERSION: 2
+ OS_REGION_NAME: "RegionOne"
  NOVA_VERSION: "1.1"
- PACKER_BIN: "/home/gitlab-runner/packer-0.10.1"
- OS_BASE_IMAGE_TRUSTY: "8f50f1c3-b094-492b-8c73-191a8f1f5582"
- IMAGE_NAME_TRUSTY: "trusty-WTSI-example"
- OS_BASE_IMAGE_XENIAL: "002ca5be-3934-43d3-9d2c-eda816b57019"
- IMAGE_NAME_XENIAL: "xenial-WTSI-example"
- OS_BASE_IMAGE_CENTOS7: "62313395-5876-439c-9a36-86839ad27195"
- IMAGE_NAME_CENTOS7: "centos7-WTSI-example"
- OS_SECURITY_GRP: "ssh"
+ USE_PACKER_BIN: "/software/packer-1.6.1/bin/packer"
+ OS_BASE_IMAGE_FOCAL: "ubuntu-20.04-server-cloudimg-amd64"
+ OS_BASE_IMAGE_BIONIC: "bionic-server"
+ OS_BASE_IMAGE_CENTOS7: "CentOS-7-2019-01-28"
+ OS_SECURITY_GRP: "cloudforms_ssh_in"
  proxy: "http://wwwcache.sanger.ac.uk:3128"
+ CENTOS_OS_FLAVOR_NAME: "o2.medium"
+ UBUNTU_OS_FLAVOR_NAME: "o2.medium"
+ OS_FLAVOR_NAME: "o2.medium"
+ LARGEST_FLAVOR_NAME: "o2.medium"
+ OS_NETWORK_IDS: "docker_runners"
+ NFS_HOST_IP: "192.168.252.42"
 
+default:
+  image:
+   name: gitlab-registry.internal.sanger.ac.uk/isg/gitlab-ci-docker-docker
 
 stages:
  - init_openstack
@@ -24,192 +38,208 @@ stages:
  - cleanup_test
  - store
 
-validate_template_trusty_openstack:
-  stage: init_openstack
-  tags: 
-   - packer
-  script:
-   - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
-   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json
-
-validate_template_xenial_openstack:
+.job_template: &validate
   stage: init_openstack
   tags:
-   - packer
+   - packer-autoscale-theta-beta
+  retry: 2
   script:
-   - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_XENIAL"
-   - ./create_image.py validate -tf template-openstack-ubuntu.json -vf variables.json
+   - export TEMPLATE="${TEMPLATE:-template-openstack-ubuntu.json}"
+   - . $(packer/scripts/make_venv.sh | tail -1 )/bin/activate
+   - cd packer
+   - ./create_image.py validate --packer-location "${USE_PACKER_BIN}" -tf "${TEMPLATE}" -vf variables.json
 
-validate_template_centos7_openstack:
-  stage: init_openstack
-  tags:
-   - packer
-  script:
-   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
-   - ./create_image.py validate -tf template-openstack-centos.json -vf variables.json
-
-build_openstack_trusty:
+.job_template: &build
  stage: build_openstack
  tags:
-  - packer
+  - packer-autoscale-theta-beta
+ retry: 2
  script:
-  - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_TRUSTY"
-  - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
+  - . $(packer/scripts/make_venv.sh | tail -1 )/bin/activate
+  - for i in $(echo $OS_NETWORK_IDS| sed 's/,/\n/g'); do echo $i; NET=$(openstack network show $i -c id -f value); NETS=$(echo "${NETS},${NET}" | sed -e 's/,,*/,/g' -e 's/^,//g'); echo $NETS; done
+  - export OS_NETWORK_IDS="$NETS"
+  - export TEMPLATE="${TEMPLATE:-template-openstack-ubuntu.json}"
+  - cd packer
+  - export OLD_IMAGE="$(openstack image list -f value -c ID -c Name| grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" | grep -v "old-" |  cut -d " " -f 2)"
+  - if [ -n "$OLD_IMAGE" ]; then openstack image set "$OLD_IMAGE" --name "old-$OLD_IMAGE"; fi
+  - ./create_image.py build --packer-location "${USE_PACKER_BIN}" -tf "${TEMPLATE}" -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
 
-build_openstack_xenial:
- stage: build_openstack
+.job_template: &test
+ stage: test_openstack
  tags:
-  - packer
+  - packer-autoscale-theta-beta
+ retry: 2
  script:
-  - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_XENIAL"
-  - ./create_image.py build -d local -tf template-openstack-ubuntu.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
-
-build_openstack_centos7:
- stage: build_openstack
- tags:
-  - packer
- script:
-  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
-  - ./create_image.py build -d local -tf template-openstack-centos.json -vf variables.json -p openstack -o "${IMAGE_NAME}"_"${CI_BUILD_REF}"
-
-cleanup_openstack_build:
-  stage: cleanup_build
-  tags:
-   - packer
-  script:
-   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-   - ./remove_failed_builds.py
-   - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-   - ./remove_failed_builds.py
-   - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-   - ./remove_failed_builds.py
-  when: on_failure
-
-
-test_openstack_no_disk_trusty:
-  stage: test_openstack
-  tags:
-   - openstack
-   - kitchen
-  script:
-  - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
-  - export MODE=default
-  - export IMAGE_USERNAME="ubuntu"
-  - export PLATFORM="ubuntu-14.04"
-  - export http_proxy=""
-  - export http_proxys=""
-  - export KEYPAIR=$( (echo -n $PLATFORM ; echo -n $MODE ; date +%s-%N ) | md5sum | cut -d " " -f 1)
-  - ./kitchen_wrapper.sh
-
-test_openstack_no_disk_xenial:
-  stage: test_openstack
-  tags:
-   - openstack
-   - kitchen
-  script:
-  - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
-  - export MODE=default
-  - export IMAGE_USERNAME="ubuntu"
-  - export PLATFORM="ubuntu-16.04"
+  - export MODE="${MODE:-default}"
+  - export IMAGE_USERNAME="${IMAGE_USERNAME:-ubuntu}"
+  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" | grep -v "old-" | cut -d " " -f 1)
   - export http_proxy=""
   - export http_proxys=""
   - export KEYPAIR=$( (echo -n $PLATFORM ; echo -n $MODE ; date +%s-%N )| md5sum | cut -d " " -f 1)
   - ./kitchen_wrapper.sh
 
-test_openstack_no_disk_centos7:
-  stage: test_openstack
-  tags:
-   - openstack
-   - kitchen
-  script:
+.job_template: &clean
+ stage: cleanup_build
+ tags:
+  - packer-autoscale-theta-beta
+ retry: 1
+ script:
+  - . $(packer/scripts/make_venv.sh | tail -1 )/bin/activate
+  - cd packer
+  - ./remove_failed_builds.py -i "${IMAGE_NAME}_${CI_PIPELINE_ID}"
+ when: on_failure
+
+.job_template: &store
+ stage: store
+ tags:
+  - packer-autoscale-theta-beta
+ script:
+  - echo "$IMAGE_NAME"
+  - packer/scripts/upload_image.sh
+
+
+validate_template_focal_openstack:
+ <<: *validate
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_FOCAL"
+
+validate_template_centos7_openstack:
+ <<: *validate
+ before_script:
   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
-  - export MODE=default
+  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
+  - export TEMPLATE="template-openstack-centos.json"
+
+validate_template_bionic_openstack:
+ <<: *validate
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_BIONIC"
+
+build_openstack_focal:
+ <<: *build
+ needs: ["validate_template_focal_openstack"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+  - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_FOCAL)"
+
+build_openstack_centos7:
+ <<: *build
+ needs: ["validate_template_centos7_openstack"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
+  - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_CENTOS7)"
+  - export TEMPLATE="template-openstack-centos.json"
+
+build_openstack_bionic:
+ <<: *build
+ needs: ["validate_template_bionic_openstack"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_BIONIC)"
+
+clean_build_openstack_bionic:
+  <<: *clean
+  needs: ["build_openstack_bionic"]
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+
+clean_build_openstack_focal:
+  <<: *clean
+  needs: ["build_openstack_focal"]
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+
+clean_build_openstack_centos7:
+  <<: *clean
+  needs: ["build_openstack_centos7"]
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
+
+test_openstack_no_disk_focal:
+ <<: *test
+ needs: ["build_openstack_focal"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+  - export PLATFORM="ubuntu-20.04"
+
+test_openstack_no_disk_centos7:
+ <<: *test
+ needs: ["build_openstack_centos7"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
   - export PLATFORM="centos-7.0"
   - export IMAGE_USERNAME="centos"
-  - export http_proxy=""
-  - export http_proxys=""
-  - export KEYPAIR=$( (echo -n $PLATFORM ; echo -n $MODE ; date +%s-%N ) | md5sum | cut -d " " -f 1)
-  - ./kitchen_wrapper.sh
 
-test_openstack_disk_trusty:
-  stage: test_openstack
-  tags:
-   - openstack
-   - kitchen
-  script:
-  - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
-  - export MODE=volume
-  - export IMAGE_USERNAME="ubuntu"
-  - export PLATFORM="ubuntu-14.04"
-  - export http_proxy=""
-  - export http_proxys=""
-  - export KEYPAIR=$( (echo -n $PLATFORM ; echo -n $MODE ; date +%s-%N ) | md5sum | cut -d " " -f 1)
-  - ./kitchen_wrapper.sh
+test_openstack_no_disk_bionic:
+ <<: *test
+ needs: ["build_openstack_bionic"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export PLATFORM="ubuntu-18.04"
 
-test_openstack_disk_xenial:
-  stage: test_openstack
-  tags:
-   - openstack
-   - kitchen
-  script:
-  - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
+test_openstack_disk_focal:
+ <<: *test
+ needs: ["build_openstack_focal"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
   - export MODE=volume
-  - export IMAGE_USERNAME="ubuntu"
-  - export PLATFORM="ubuntu-16.04"
-  - export http_proxy=""
-  - export http_proxys=""
-  - export KEYPAIR=$( (echo -n $PLATFORM ; echo -n $MODE ; date +%s-%N ) | md5sum | cut -d " " -f 1)
-  - ./kitchen_wrapper.sh
+  - export PLATFORM="ubuntu-20.04"
 
 test_openstack_disk_centos7:
-  stage: test_openstack
-  tags:
-   - openstack
-   - kitchen
-  script:
+ <<: *test
+ needs: ["build_openstack_centos7"]
+ before_script:
   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export OS_BASE_IMAGE=$(openstack image list -f value | grep -w "${IMAGE_NAME}"_"${CI_BUILD_REF}" |  cut -d " " -f 1)
   - export MODE=volume
   - export IMAGE_USERNAME="centos"
   - export PLATFORM="centos-7.0"
-  - export http_proxy=""
-  - export http_proxys=""
-  - export KEYPAIR=$( (echo -n $PLATFORM ; echo -n $MODE ; date +%s-%N ) | md5sum | cut -d " " -f 1)
-  - ./kitchen_wrapper.sh
 
-cleanup_openstack_test:
-  stage: cleanup_build
-  tags:
-   - packer
-  script:
+test_openstack_disk_bionic:
+ <<: *test
+ needs: ["build_openstack_bionic"]
+ before_script:
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export MODE=volume
+  - export PLATFORM="ubuntu-18.04"
+
+clean_test_openstack_bionic:
+  <<: *clean
+  needs: ["test_openstack_disk_bionic","test_openstack_no_disk_bionic"]
+  stage: cleanup_test
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+
+clean_test_openstack_focal:
+  <<: *clean
+  needs: ["test_openstack_disk_focal","test_openstack_no_disk_focal"]
+  stage: cleanup_test
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+
+clean_test_openstack_centos7:
+  <<: *clean
+  needs: ["test_openstack_disk_centos7","test_openstack_no_disk_centos7"]
+  stage: cleanup_test
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
+
+store_openstack_image_bionic:
+  <<: *store
+  needs: ["test_openstack_disk_bionic","test_openstack_no_disk_bionic"]
+  before_script:
+   - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+
+store_openstack_image_focal:
+  <<: *store
+  needs: ["test_openstack_disk_focal","test_openstack_no_disk_focal"]
+  before_script:
+   - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+
+store_openstack_image_centos7:
+  <<: *store
+  needs: ["test_openstack_disk_centos7","test_openstack_no_disk_centos7"]
+  before_script:
    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-   - ./remove_failed_builds.py
-   - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-   - ./remove_failed_builds.py
-   - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-   - ./remove_failed_builds.py
 
-  when: on_failure
-
-store_openstack_image:
-  stage: store
-  tags:
-  - packer
-  script:
-  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - ./cleanup.py -dt "${IMAGE_NAME}"_"${CI_BUILD_REF}" "${IMAGE_NAME}"
-  - export IMAGE_NAME="$IMAGE_NAME_TRUSTY"
-  - ./cleanup.py -dt "${IMAGE_NAME}"_"${CI_BUILD_REF}" "${IMAGE_NAME}"
-  - export IMAGE_NAME="$IMAGE_NAME_XENIAL"
-  - ./cleanup.py -dt "${IMAGE_NAME}"_"${CI_BUILD_REF}" "${IMAGE_NAME}"

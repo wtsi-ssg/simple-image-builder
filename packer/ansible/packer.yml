@@ -1,0 +1,6 @@
+- name: roles
+  become: True
+  become_user: root
+  hosts: all
+  roles:
+    - sanger-flex-base
