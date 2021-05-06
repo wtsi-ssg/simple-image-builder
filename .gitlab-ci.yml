@@ -1,7 +1,6 @@
 variables:
- IMAGE_NAME_FOCAL: "focal-WTSI-standard_${CI_PIPELINE_ID}"
- IMAGE_NAME_BIONIC: "bionic-WTSI-standard_${CI_PIPELINE_ID}"
- IMAGE_NAME_CENTOS7: "centos7-WTSI-standard_${CI_PIPELINE_ID}"
+ IMAGE_NAME_BIONIC_LUSTRE: "bionic-WTSI-lustreonly_${CI_PIPELINE_ID}"
+ IMAGE_NAME_BIONIC_LUSTRE_DOCKER: "bionic-WTSI-lustre_docker_${CI_PIPELINE_ID}"
  OS_NO_CACHE: "True"
  COMPUTE_API_VERSION: "1.1"
  no_proxy: ",172.27.66.32" 
@@ -19,7 +18,6 @@ variables:
  OS_BASE_IMAGE_CENTOS7: "CentOS-7-2019-01-28"
  OS_SECURITY_GRP: "cloudforms_ssh_in"
  proxy: "http://wwwcache.sanger.ac.uk:3128"
- CENTOS_OS_FLAVOR_NAME: "o2.medium"
  UBUNTU_OS_FLAVOR_NAME: "o2.medium"
  OS_FLAVOR_NAME: "o2.medium"
  LARGEST_FLAVOR_NAME: "o2.medium"
@@ -98,148 +96,100 @@ stages:
   - packer/scripts/upload_image.sh
 
 
-validate_template_focal_openstack:
+validate_template_bionic_openstack_lustre:
  <<: *validate
  before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
-  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_FOCAL"
-
-validate_template_centos7_openstack:
- <<: *validate
- before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_CENTOS7"
-  - export TEMPLATE="template-openstack-centos.json"
-
-validate_template_bionic_openstack:
- <<: *validate
- before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
   - export OS_BASE_IMAGE="$OS_BASE_IMAGE_BIONIC"
 
-build_openstack_focal:
- <<: *build
- needs: ["validate_template_focal_openstack"]
+validate_template_bionic_openstack_lustre_docker:
+ <<: *validate
  before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
-  - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_FOCAL)"
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
+  - export OS_BASE_IMAGE="$OS_BASE_IMAGE_BIONIC"
 
-build_openstack_centos7:
+build_openstack_bionic_lustre:
  <<: *build
- needs: ["validate_template_centos7_openstack"]
+ needs: ["validate_template_bionic_openstack_lustre"]
  before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_CENTOS7)"
-  - export TEMPLATE="template-openstack-centos.json"
-
-build_openstack_bionic:
- <<: *build
- needs: ["validate_template_bionic_openstack"]
- before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
   - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_BIONIC)"
 
-clean_build_openstack_bionic:
-  <<: *clean
-  needs: ["build_openstack_bionic"]
-  before_script:
-    - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
-
-clean_build_openstack_focal:
-  <<: *clean
-  needs: ["build_openstack_focal"]
-  before_script:
-    - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
-
-clean_build_openstack_centos7:
-  <<: *clean
-  needs: ["build_openstack_centos7"]
-  before_script:
-    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-
-test_openstack_no_disk_focal:
- <<: *test
- needs: ["build_openstack_focal"]
+build_openstack_bionic_lustre_docker:
+ <<: *build
+ needs: ["validate_template_bionic_openstack_lustre_docker"]
  before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
-  - export PLATFORM="ubuntu-20.04"
+  - export CONTAINER=true
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
+  - export OS_BASE_IMAGE="$(openstack image show -c id -f value $OS_BASE_IMAGE_BIONIC)"
 
-test_openstack_no_disk_centos7:
- <<: *test
- needs: ["build_openstack_centos7"]
- before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export PLATFORM="centos-7.0"
-  - export IMAGE_USERNAME="centos"
+clean_build_openstack_bionic_lustre:
+  <<: *clean
+  needs: ["build_openstack_bionic_lustre"]
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
 
-test_openstack_no_disk_bionic:
+clean_build_openstack_bionic_lustre_docker:
+  <<: *clean
+  needs: ["build_openstack_bionic_lustre_docker"]
+  before_script:
+    - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
+
+test_openstack_no_disk_bionic_lustre:
  <<: *test
- needs: ["build_openstack_bionic"]
+ needs: ["build_openstack_bionic_lustre"]
  before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
   - export PLATFORM="ubuntu-18.04"
 
-test_openstack_disk_focal:
+test_openstack_disk_bionic_lustre:
  <<: *test
- needs: ["build_openstack_focal"]
+ needs: ["build_openstack_bionic_lustre"]
  before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
-  - export MODE=volume
-  - export PLATFORM="ubuntu-20.04"
-
-test_openstack_disk_centos7:
- <<: *test
- needs: ["build_openstack_centos7"]
- before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-  - export MODE=volume
-  - export IMAGE_USERNAME="centos"
-  - export PLATFORM="centos-7.0"
-
-test_openstack_disk_bionic:
- <<: *test
- needs: ["build_openstack_bionic"]
- before_script:
-  - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
   - export MODE=volume
   - export PLATFORM="ubuntu-18.04"
 
-clean_test_openstack_bionic:
+test_openstack_no_disk_bionic_lustre_docker:
+ <<: *test
+ needs: ["build_openstack_bionic_lustre_docker"]
+ before_script:
+  - export CONTAINER=true
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
+  - export PLATFORM="ubuntu-18.04"
+  - export MODE=default-docker
+
+test_openstack_disk_bionic_lustre_docker:
+ <<: *test
+ needs: ["build_openstack_bionic_lustre_docker"]
+ before_script:
+  - export CONTAINER=true
+  - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
+  - export MODE=volume-docker
+  - export PLATFORM="ubuntu-18.04"
+
+clean_test_openstack_bionic_lustre:
   <<: *clean
-  needs: ["test_openstack_disk_bionic","test_openstack_no_disk_bionic"]
+  needs: ["test_openstack_disk_bionic_lustre","test_openstack_no_disk_bionic_lustre"]
   stage: cleanup_test
   before_script:
-    - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+    - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
 
-clean_test_openstack_focal:
+clean_test_openstack_bionic_lustre_docker:
   <<: *clean
-  needs: ["test_openstack_disk_focal","test_openstack_no_disk_focal"]
+  needs: ["test_openstack_disk_bionic_lustre_docker","test_openstack_no_disk_bionic_lustre_docker"]
   stage: cleanup_test
   before_script:
-    - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
+    - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
 
-clean_test_openstack_centos7:
-  <<: *clean
-  needs: ["test_openstack_disk_centos7","test_openstack_no_disk_centos7"]
-  stage: cleanup_test
-  before_script:
-    - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-
-store_openstack_image_bionic:
+store_openstack_image_bionic_lustre:
   <<: *store
-  needs: ["test_openstack_disk_bionic","test_openstack_no_disk_bionic"]
+  needs: ["test_openstack_disk_bionic_lustre","test_openstack_no_disk_bionic_lustre"]
   before_script:
-   - export IMAGE_NAME="$IMAGE_NAME_BIONIC"
+   - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE"
 
-store_openstack_image_focal:
+store_openstack_image_bionic_lustre_docker:
   <<: *store
-  needs: ["test_openstack_disk_focal","test_openstack_no_disk_focal"]
+  needs: ["test_openstack_disk_bionic_lustre_docker","test_openstack_no_disk_bionic_lustre_docker"]
   before_script:
-   - export IMAGE_NAME="$IMAGE_NAME_FOCAL"
-
-store_openstack_image_centos7:
-  <<: *store
-  needs: ["test_openstack_disk_centos7","test_openstack_no_disk_centos7"]
-  before_script:
-   - export IMAGE_NAME="$IMAGE_NAME_CENTOS7"
-
+   - export IMAGE_NAME="$IMAGE_NAME_BIONIC_LUSTRE_DOCKER"
