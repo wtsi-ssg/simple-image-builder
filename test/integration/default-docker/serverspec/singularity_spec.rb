@@ -1,0 +1,1 @@
+../../shared/serverspec/singularity_spec.rb

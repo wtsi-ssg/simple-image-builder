@@ -1,9 +1,9 @@
 {
-    "reboot": "NO",
+    "reboot": "YES",
     "null_user": "<null username>",
     "null_key": "<null key file>",
-    "extra_script": "scripts/null.sh",
-    "post_reboot_extra_script": "scripts/null.sh",
+    "extra_script": "scripts/lustre_pre.sh",
+    "post_reboot_extra_script": "scripts/lustre_post.sh",
     "directory": ".",
     "packer_directory": ".",
     "ansible_rolepath0": "./ansible/roles/null",

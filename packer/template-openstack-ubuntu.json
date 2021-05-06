@@ -50,11 +50,15 @@
         },
         {
             "environment_vars": [
+		"DID={{ user `did` }}",
+		"CONTAINER={{ user `container` }}",
                 "image={{ user `image_name` }}"
             ],
             "execute_command": "echo ubuntu | {{ .Vars }}  sudo -E -S bash '{{ .Path }}'",
             "scripts": [
                 "{{user `directory`}}/scripts/install_metricbeat.sh",
+		"{{user `directory`}}/scripts/install_docker.sh",
+		"{{user `directory`}}/scripts/install_singularity.sh",
                 "{{user `extra_script`}}"
             ],
             "type": "shell"
@@ -72,7 +76,11 @@
         },
         {
             "environment_vars": [
-                "image={{ user `image_name` }}"
+                "image={{ user `image_name` }}",
+		"DID={{ user `did` }}",
+		"CONTAINER={{ user `container` }}",
+                "ANSIBLE_READ_SECRET={{ user `ansible_read_secret` }}",
+                "ANSIBLE_READ_USER={{ user `ansible_read_user` }}"
             ],
             "pause_before": "30s",
             "execute_command": "echo ubuntu | {{ .Vars }}  sudo -E -S bash '{{ .Path }}'",
@@ -99,6 +107,11 @@
         "flavor_name": "{{ env `UBUNTU_OS_FLAVOR_NAME`}}",
         "openstack_imgid": "{{ env `OS_BASE_IMAGE`}}",
         "openstack_sg": "{{ env `OS_SECURITY_GRP`}}",
-	"net_id": "{{ env `OS_NETWORK_IDS`}}"
+	"net_id": "{{ env `OS_NETWORK_IDS`}}",
+        "ansible_read_user" : "{{ env `ANSIBLE_READ_USER` }}",
+        "ansible_read_secret" : "{{ env `ANSIBLE_READ_SECRET` }}",
+	"container" : "{{ env `CONTAINER` }}",
+	"did": "{{ env `DID`}}"
     }
 }
+
