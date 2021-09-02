@@ -15,7 +15,7 @@ GEM
     net-ssh (6.1.0)
     net-telnet (0.1.1)
     rake (13.0.1)
-    rdoc (6.2.1)
+    rdoc (6.3.1)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
       rspec-expectations (~> 3.10.0)
@@ -56,7 +56,7 @@ DEPENDENCIES
   net-telnet (< 0.2.0)
   rake
   rdoc
-  rspec-core
+  rspec-core (~> 3.10.0)
   rspec-support
   serverspec
 
