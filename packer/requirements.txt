@@ -16,7 +16,7 @@ netifaces==0.10.9
 os-service-types==1.7.0
 oslo.i18n==5.0.0
 oslo.serialization==4.0.0
-oslo.utils==4.4.0
+oslo.utils==4.10.1
 packaging==20.4
 pbr==5.4.5
 prettytable==0.7.2
